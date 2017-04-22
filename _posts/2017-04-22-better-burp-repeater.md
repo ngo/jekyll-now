@@ -15,4 +15,4 @@ will look and feel.
 
 The [specification](/better-repeater) is currently a (very early) work in progress. All comments and suggestions are very much appreciated though!
 
-[repeater_madness]: https://pbs.twimg.com/media/BL7ItRBCcAELYAj.png!
+[repeater_madness]: https://pbs.twimg.com/media/BL7ItRBCcAELYAj.png
