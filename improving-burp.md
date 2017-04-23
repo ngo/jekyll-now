@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Better Burp Repeater
-permalink: /better-repeater/
+permalink: /improving-burp/
 ---
 
 * TOC

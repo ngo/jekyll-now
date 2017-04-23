@@ -12,6 +12,6 @@ But for manual testing of a sufficiently large app, repeater quicly gets clutter
 
 We deserve better, and instead of ocasional rants I've decided to draft a proposal on how we can improve burp with the focus on performing manual (and perhaps automated) testing in a more efficient way. 
 
-The [proposal](/better-burp) is currently a (very early) work in progress. All comments and suggestions are very much appreciated though!
+The [proposal](/improving-burp) is currently a (very early) work in progress. All comments and suggestions are very much appreciated though!
 
 [repeater_madness]: https://pbs.twimg.com/media/BL7ItRBCcAELYAj.png
