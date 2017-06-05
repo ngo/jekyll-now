@@ -229,4 +229,4 @@ expl
 
 ## Patch
 
-The status endpoint simply outputs a constant banner, so we reimplemented is using some python, and the used some iptables rules to redirect traffic from port 1667 to our safe implementation.
+The status endpoint simply outputs a constant banner, so we reimplemented it using some python, and the used some iptables rules to redirect traffic from port 1667 to our safe implementation.
