@@ -3,32 +3,32 @@ layout: post
 title: SSLKEYLOGFILE-like functionality for schannel secrets
 ---
 
-For some protocol reversing I've lately been needing a way to extract TLS secrets for traffic decryption. For openssl-based software there exists a SSLKEYLOGFILE env var as well as a way to LD_PRELOAD a special wrapper. For schannel - no such luck.
+For some protocol reversing I've lately been needing a way to extract TLS secrets for traffic decryption. For openssl-based software there exists a `SSLKEYLOGFILE` env var as well as a way to `LD_PRELOAD` a special wrapper. For schannel - no such luck.
 
-I've thrown together a frida script that is able to generate SSLKEYLOG-like file for wireshark for some of TLS connections that use SChannel.
+I've thrown together a frida script that is able to generate `SSLKEYLOG`-compatible file for wireshark for some of TLS connections that use SChannel.
 
 ## Preparing
 
 1. You'll need admin privilege in order to utilize this method.
-2. Mke sure that the memory of lsass.exe is accessible to th admin user. The easiest way is to open Task Manager, find lsass.exe in details and try to make a dump of the process. If this is successful, you can proceed.
-3. Download and install python3 for windows. The python install direcroty will be referred to as PYTHONDIR.
-4. Open powershell as admin, cd to PYTHONDIR/Scripts
+2. Make sure that the memory of lsass.exe is accessible to th admin user. The easiest way is to open Task Manager, find lsass.exe in details and try to make a dump of the process. If this is successful, you can proceed.
+3. Download and install python3 for windows. The python install direcroty will be referred to as `PYTHONDIR`.
+4. Open powershell as admin, cd to `PYTHONDIR/Scripts`
 5. run `.\pip.exe install frida-tools`
-6. Copy lsass-sslkeylog.js from https://github.com/ngo/win-frida-scripts/ to a file somewhere, for example C:\tools\lsass-sslkeylog.js
+6. Copy `lsass-sslkeylog.js` from [win-frida-scripts](https://github.com/ngo/win-frida-scripts/) to a file somewhere, for example `C:\tools\lsass-sslkeylog.js`.
 
 
 ## Running frida
 
-1. Open powershell as administrator, go to PYTHONDIR/Scripts
+1. Open powershell as administrator, go to `PYTHONDIR/Scripts`
 2. run `.\frida.exe lsass.exe --no-pause -l C:\path\to\lsass-sslkeylog.js`
-3. The keylog file will be created as C:\keylog.log
+3. The keylog file will be created as `C:\keylog.log`
 
 
 ## Decrypting traffic
 
 1. Launch wireshark
-2. Go to Edit->Preferences->Protocols->TLS
-3. Set (Pre)-Master-Secret log filename to C:\keylog.log
+2. Go to `Edit->Preferences->Protocols->TLS`
+3. Set `(Pre)-Master-Secret log filename` to `C:\keylog.log`
 4. Make sure that frida is still running
 5. Enable traffic capture
 6. Enjoy some traffic decryption
@@ -38,9 +38,9 @@ I've thrown together a frida script that is able to generate SSLKEYLOG-like file
 
 NB: all tests were performed on Win10 1909. Everything else is yet untested. 
 
-1. RDP client traffic (mstsc.exe)
+1. RDP client traffic (`mstsc.exe`)
 2. Powrershell's `Invoke-WebRequest`
-3. In some cases - traffic from ms edge.
+3. In some cases - traffic from MS Edge.
 
 ## Known problems
 
@@ -51,4 +51,4 @@ NB: all tests were performed on Win10 1909. Everything else is yet untested.
 
 ## Feedback
 
-* webpentest on twitter and on gmail.
+* `webpentest` on twitter and on gmail.
