@@ -7,7 +7,7 @@ For some protocol reversing I've lately been needing a way to extract TLS secret
 
 I've thrown together a frida script that is able to generate `SSLKEYLOG`-compatible file for wireshark for some of TLS connections that use SChannel.
 
-## Preparing
+## Preparation
 
 1. You'll need admin privilege in order to utilize this method.
 2. Make sure that the memory of lsass.exe is accessible to th admin user. The easiest way is to open Task Manager, find lsass.exe in details and try to make a dump of the process. If this is successful, you can proceed.
@@ -39,7 +39,7 @@ I've thrown together a frida script that is able to generate `SSLKEYLOG`-compati
 NB: all tests were performed on Win10 1909. Everything else is yet untested. 
 
 1. RDP client traffic (`mstsc.exe`)
-2. Powrershell's `Invoke-WebRequest`
+2. Powershell's `Invoke-WebRequest`
 3. In some cases - traffic from MS Edge.
 
 ## Known problems
