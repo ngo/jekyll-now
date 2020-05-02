@@ -14,8 +14,9 @@ I've thrown together a frida script that is able to generate `SSLKEYLOG`-compati
 3. Although it is possible to run this from a single machine, it is more convenient to utilize two: one with frida-server, the other - with frida itself (acts as a client).
 4. [On windows machine] Download and unpack frida-server executable from [Frida releases](https://github.com/frida/frida/releases)
 5. [On windows machine] Run `frida-server.exe -l 0.0.0.0`
-6. [On the frida machine] Install python3, get  [win-frida-scripts](https://github.com/ngo/win-frida-scripts/), install [prerequisites](https://github.com/ngo/win-frida-scripts/tree/master/lsass-sslkeylog#requirements).
-7. [On the frida machine] [Run lsasslkeylog](https://github.com/ngo/win-frida-scripts/tree/master/lsass-sslkeylog#running)
+6. [On windows machine] Turn off firewall or add exception for port 27042, which frida-server uses.
+7. [On the frida machine] Install python3, get  [win-frida-scripts](https://github.com/ngo/win-frida-scripts/), install [prerequisites](https://github.com/ngo/win-frida-scripts/tree/master/lsass-sslkeylog#requirements).
+8. [On the frida machine] [Run lsasslkeylog](https://github.com/ngo/win-frida-scripts/tree/master/lsass-sslkeylog#running)
 
 
 ## Decrypting traffic
@@ -31,8 +32,10 @@ I've thrown together a frida script that is able to generate `SSLKEYLOG`-compati
 ## Tested OS versions
 
 1. Win 10 Pro (`10.0.18363`)
-2. Windows Server 2012 R2 Standard (`6.3.9600`)
-3. Windows Server 2008 R2 Enterprise (`6.1.7601`)
+2. Windows Server 2019 Datacenter (`10.0.17763`)
+3. Windows Server 2016 Datacenter (`10.0.14393`)
+4. Windows Server 2012 R2 Standard (`6.3.9600`)
+5. Windows Server 2008 R2 Enterprise (`6.1.7601`)
 
 ## Tested use-cases
 
@@ -45,7 +48,7 @@ I've thrown together a frida script that is able to generate `SSLKEYLOG`-compati
 1. 64-bit windows only
 2. Resumed TLS sessions will not be decrypted, if the initial full handshake wasn't captured. This is because we hook key creation, and on resumptions keys are not created again.
 3. Tested to work with TLS1.2, will not work for anything above or below (yet).
-4. will crash your lsass if you supply wrong pdb or wrong schannel.dll.
+4. will crash your lsass if you supply wrong schannel.dll or PDB.
 
 ## Feedback
 
