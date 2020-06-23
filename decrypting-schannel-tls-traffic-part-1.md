@@ -15,7 +15,7 @@ This work is part of my R&D activities at [SolidLab LLC](https://solidlab.ru) an
 
 The article below is quite long and describes my journey in reverse-engineering schannel in much detail. For people experienced in windows internals and WinDBG it might be too verbose, but I inteded for it to be useful to people with little to no experience.
 
-Feel free to contact me by email (ngo at solidlab.ru) or [@webpentest on twitter](twitter.com/webpentest).
+Feel free to contact me by email (ngo at solidlab.ru) or [@webpentest on twitter](twitter.com/webpentest). There is also a comments section at the bottom of the page.
 
 ## Table of contents
 
