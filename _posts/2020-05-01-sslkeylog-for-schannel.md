@@ -1,6 +1,7 @@
 ---
 layout: post
 title: SSLKEYLOGFILE-like functionality for schannel secrets
+published: false
 ---
 
 For some protocol reversing I've lately been needing a way to extract TLS secrets for traffic decryption. For openssl-based software there exists a `SSLKEYLOGFILE` env var as well as a way to `LD_PRELOAD` a special wrapper. For schannel - no such luck.
