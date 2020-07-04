@@ -22,9 +22,9 @@ Feel free to contact me by email (ngo at solidlab.ru) or [@webpentest on twitter
 * TOC
 {:toc}
 
-## <a href="#sect1" id="sect1">1</a> Introduction
+## 1 Introduction
 
-### <a href="#sect1.1" id="sect1.1">1.1</a> What is SChannel
+### 1.1 What is SChannel
 
 SChannel a.k.a Secure Channel [\[23\]](#ref23) is a windows subsystem that is used whenever a windows application wants to do anything related to TLS - establish an encrypted session to a remote server or, on the contrary, accept a TLS connection from a client. 
 
@@ -38,7 +38,7 @@ As said earlier, schannel is used whenever windows application wants to establis
 
 As said earlier,other browsers such as `Firefox` and `Google Chrome` use other libraries to handle TLS, namely NSS and OpenSSL, so their traffic is out of scope for this article. But both NSS and OpenSSL are open source and have documented ways to export secrets; for Firefox and Chrome key export is built-in and can be activated by using `SSLKEYLOGFILE` env var.
 
-### <a href="#sect1.2" id="sect1.2">1.2</a> TLS traffic decryption and ephemeral keys - TLS1.2
+### 1.2 TLS traffic decryption and ephemeral keys - TLS1.2
 
 The scope of this research is to obtain information needed to decrypt TLS traffic. This is not an exploit or a weakness of the protocol, because we fully control the application and OS that establish or accept the connection, thus being able to retrieve any keys and secrets that are used.
 
@@ -58,7 +58,7 @@ CLIENT_RANDOM <client_random> <master_secret>
 ```
 8. Keylog file format does not support providing directly the write and MAC **keys**, it needs either the premaster or the master **secret**, supposedly because this way you only need one keylog line per session, and secrets can be the expanded to the needed keys by the application that parses the keylog.
 
-### <a href="#sect1.3" id="sect1.3">1.3</a> TLS traffic decryption - TLS1.3
+### 1.3 TLS traffic decryption - TLS1.3
 
 Many of the things said above about TLS1.2 are also applicable to TLS1.3. There are, however, many changes in the way the secrets are generated. 
 
@@ -87,7 +87,7 @@ CLIENT_TRAFFIC_SECRET_0 <client_random> <client_traffic_secret_0>
 CLIENT_TRAFFIC_SECRET_0 <client_random> <server_traffic_secret_0>
 ```
 
-### <a href="#sect1.4" id="sect1.4">1.4</a> Schannel, lsass and key isolation
+### 1.4 Schannel, lsass and key isolation
 
 The windows schannel API has the concept of key isolation (see [\[5\]](#ref5)), that is designed to make it harder to leak various confidential data by storing it in a centralized isolated place.  Suppose we have a process (say, terminal services client, mstsc) that wishes to establish a TLS connection. The actual TLS handshake would be performed inside another process (namely, *lsass.exe*) and the secrets generated during the handshake (i.e. pre-master and master keys for TLS1.2) will never leave the memory of lsass.exe and never reach mstsc.exe. All of this is done transparently to the application, which just uses functions from schannel.dll. 
 
@@ -97,7 +97,7 @@ Note that this mode of operation is not specific to schannel but applies to all 
 
 And for us this means that lsass.exe would be a nice centralized place to extract **all** ephemeral TLS keys used by any schannel-enabled application. We'll need to either hook the key creation/manipulation routines or find a way to reliably find them in memory. In order to make use of the obtained keys we will also need to tie them somehow to a TLS session, preferably in a way supported by Wireshark (i.e. either session id or client random).
 
-## <a href="#sect2" id="sect2">2</a> Related work
+## 2 Related work
 
 My interest in extracting keys from Schannel is not something new; a number of previous authors have explored this topic.
 
@@ -111,7 +111,7 @@ To the best of my knowlege, this concludes the list of publicly available resear
 
 To conclude this section, I would like to thank **Peter Wu** from wireshark-dev mailing list for helping me with the links to relevant research on the topic.
 
-## <a href="#sect3" id="sect3">3</a> Problem statement
+## 3 Problem statement
 
 My goal was to develop a tool to decrypt schannel TLS traffic in Wireshark, while being in full control of the application and/or operating system on either the client or the server side of the connection. Compared to the problem statement of Jacob Kambic's thesis ([\[1\]](#ref1)), that targeted forensic extraction of the keys from memory dumps, I have more flexibility of the approach, because I can not only use memory scanning, but also debugging and function hooks. Other key requirements for the tool are as follows:
  * do not rely on session resumption and other mechanisms that prevent the keys from being wiped out of the memory as soon as the connection is closed;
@@ -121,11 +121,11 @@ My goal was to develop a tool to decrypt schannel TLS traffic in Wireshark, whil
 
 Besides developing the tool, I wanted to gain deeper understanding of windows internals, develop some reverse engineering skill and document the process I used.
 
-## <a href="#sect4" id="sect4">4</a> Setting up testbeds
+## 4 Setting up testbeds
 
 When researching ways to obtain ephemeral keys from non-collaborating applications it is very convenient to have full control over the other side of the connection and be able to easily extract keys from there. This applies both when our schannel part is a client and a server.
 
-### <a href="#sect4.1" d="sect4.1">4.1</a> sslsplit server mitm testbed
+### 4.1 sslsplit server mitm testbed
 
 Sslsplit [\[15\]](#ref15) is an excellent tool to MITM ssl connections. It supports various modes of operation and has built-in functionality to export TLS session keys to a keylog file. You'll need to generate a new self-signed certificate with a private key and write key+cert to a combined PEM file. After that you can launch sslsplit:
 ```command
@@ -137,7 +137,7 @@ The line above will listen on port 3389 and forward all traffic to 192.168.88.18
 
 The file keys.log will contain ephemeral keys for all connections it makes in the format `CLIENT_RANDOM <client_random> <master secret>`.
 
-### <a href="#sect4.2" id="sect4.2">4.2</a> OpenSSL sample server with libsslkeylog
+### 4.2 OpenSSL sample server with libsslkeylog
 
 When we do not need the MITM, it might be easier to just use the `openssl s_server` utility from the openssl package. In this case, in order to get the key log we will need to LD_PRELOAD libsslkeylog library by Peter Wu  ([\[41\]](#ref41)). The final command line will look like the following:
 ```command
@@ -146,9 +146,9 @@ $ sudo SSLKEYLOGFILE=log.txt ./sslkeylog.sh openssl s_server -port 443
 
 The keys will go to log.txt
 
-## <a href="#sect5" id="sect5">5</a> Obtaining TLS1.2 keys by hooking lsass.exe
+## 5 Obtaining TLS1.2 keys by hooking lsass.exe
 
-### <a href="#sect5.1" id="sect5.1">5.1</a> Setting up the environment for debugging lsass
+### 5.1 Setting up the environment for debugging lsass
 
 lsass.exe is a process that is very much involved in the normal functioning of Windows, so if you try to just attach WinDBG to it and pause its execution, the system will start to behave strangely and will autoreboot in a couple of minutes. In order to get a normal debugging experience one need to set up remote debugging.
 
@@ -171,7 +171,7 @@ PS > .\windbg.exe -premote "tcp:server=<ip>,port=1025" -p <PID>
 You can also connect from windbg GUI , using the connection string above.
 Note that if you get an error 0n10049 in your client windbg, make sure to enclose the full connection string inside quotes. For some reason in some cases windbg only gets the first part of the arg, before the comma, and fails to connect.
 
-### <a href="#sect5.2" id="sect5.2">5.2</a> Getting master keys on their generation
+### 5.2 Getting master keys on their generation
 
 First of all, let's check the approach of hooking master key generation propesed in [\[7\]](#ref7),[\[8\]](#ref8),[\[9\]](#ref9). After attaching to lsass, we'll install a breakpoint on `SslGenerateMasterKey` from `ncrypt.dll` (`bm ncrypt!SslGenerateMasterKey`) and continue execution (`g`). Note: here and below I'll provide WinDBG commands for people who, like me, have never before used WinDBG, because for gdb users these commands are awkward to say the least.
 
@@ -324,7 +324,7 @@ ncrypt!NCryptDeriveKey:
 <SNIP>
 ```
 
-### <a href="#sect5.3" id="sect5.3">5.3</a> Matching keys to sessions
+### 5.3 Matching keys to sessions
 
 If we once again review the arguments of `SslGenerateMasterKey` ([\[13\]](#ref13)), we can see an interesting remark for the pParameterList argument:
 
@@ -416,7 +416,7 @@ Also, notice this strange `DOWNGRD` in the server random above? This is a downgr
 
 Another thing to notice here is the fact that both the client and the server random start with the same 4-byte sequence. This is because as per TLS1.2 spec, they should contain the unix time of the connection (see [\[20\]](#ref20), section 7.4.1.2). Windows clients and servers conform to this, while for OpenSSL it really depends on the version - modern versions of OpenSSL use just random bytes instead.
 
-### <a href="#sect5.4" id="sect5.4">5.4</a> Automation with frida-trace
+### 5.4 Automation with frida-trace
 
 Knowing all the things above is good, but the windbg-based approach will not scale well for automation. The easiest way to perform all of this extraction is to use the frida dynamic instrumentation toolkit [\[21\]](#ref21). 
 
@@ -501,7 +501,7 @@ CLIENT_RANDOM 5eea40a7f48e12896355cc433a209e42f97d5238da5b999a7f527c2d785776d3 7
 ....
 ```
 
-### <a href="#sect5.5" id="sect5.5">5.5</a> Dealing with non-PFS ciphersuites on the server
+### 5.5 Dealing with non-PFS ciphersuites on the server
 
 The frida script above works for keys exchanged using PFS ciphers (i.e. those based on diffie-hellman exchange) both on client and on server. This also works when windows client connects to a server using a non-PFS ciphersuite.
 However, this does not work when a windows server accepts a connection that uses a non-PFS ciphersuite - the `SslGenerateMasterKey` function is never called. Nor, for that matter, the `ncrypt!NCryptDeriveKey` used in [\[9\]](#ref9). This is because for RSA-based key exchange the master key is not computed during diffie-hellman exchange, but generated by the client and sent to server, encrypted by the server's public key (thats why it is not forwardly-secret - we can decrypt it at any time if we have the server private key).
@@ -578,7 +578,7 @@ SECURITY_STATUS WINAPI SslImportMasterKey(
 
 What is event better, we can reuse our logic for parsing `pParameterList` that we already have for getting the client random.
 
-### <a href="#sect5.6" id="sect5.6">5.6</a> Dealing with TLS session hashes
+### 5.6 Dealing with TLS session hashes
 
 While testing the above approach, I've found that sometimes, when trying to get the client_random from the args of `Ssl{Generate,Import}MasterKey`, I see that it is not passed inside `pParameterList`! Though the docs ([\[26\]](#ref26)) say that `At the minimum, the list will contain buffers that contain the client and server supplied random values`, in some cases it only contains buffers of type 22 and 25. 22 is `NCRYPTBUFFER_SSL_HIGHEST_VERSION`, which is not useful at all. 25 is `NCRYPTBUFFER_SSL_SESSION_HASH`. WTF is the SSL session hash?
 
@@ -680,7 +680,7 @@ As we can see, the argument of SslHashHandshake contains exactly the ClientHello
 SslHashHandshake is called three times, but we can distinguish the needed call by the `01 ?? ?? ?? 03 03` prefix and grab the client secret starting at offset 6. With this, we have all the instruments we need to grab the keys and client randoms for TLS1.2 connections.
 
 
-## <a href="#sect6" id="sect6">6</a> Obtaining TLS1.3 keys
+## 6 Obtaining TLS1.3 keys
 
 All of the above was relevant for TLS1.2 key extraction only. During discussions on wireshark-dev ML, Peter Wu pointed to me that, starting from 1909, Windows 10 also includes experimental support for TLS1.3 ([\[30\]](#ref30)). I decided to look into extracting TLS1.3 secrets as well.
 
@@ -897,11 +897,11 @@ From ghidra we can also find that the aforementioned `CTls13Context::ExpandTraff
 
 Note that there is a naming confusion between the RFC 8446 and `ncrypt.dll` symbols. In RFC 8446 the intermediate secret values are called **secrets** and only the end keys that are used to actually encrypt/decrypt traffic are called (write) **keys**. In ncrypt.dll all sorts of secrets are called keys. We have already established that `SslExpandTrafficKeys` expands traffic **secrets**, not  **keys**. 
 
-But secrets (and not keys) is exactly what I needede for SSLKEYLOGFILE (see [section 1.3](#sect1.3))! This means that it should be enough to hook the output of `SslExpandTrafficKeys` - each call should provide me with two secrets.
+But secrets (and not keys) is exactly what I needede for SSLKEYLOGFILE (see [section 1.3](#13-tls-traffic-decryption---tls13))! This means that it should be enough to hook the output of `SslExpandTrafficKeys` - each call should provide me with two secrets.
 
-Looking at the listing of `CTls13Context::ExpandTrafficAndWriteKeys` above, we can deduce that `SslExpandTrafficKeys` places the two resulting keys into param_4 and param_5. Let's try to check them in the debugger, but before doing that, we'll fire up our openssl s_server testbed (see [section 4.2](#sect4.2)) in order to be able to see the keys and match them to the contents of the memory.
+Looking at the listing of `CTls13Context::ExpandTrafficAndWriteKeys` above, we can deduce that `SslExpandTrafficKeys` places the two resulting keys into param_4 and param_5. Let's try to check them in the debugger, but before doing that, we'll fire up our openssl s_server testbed (see [section 4.2](#42-openssl-sample-server-with-libsslkeylog)) in order to be able to see the keys and match them to the contents of the memory.
 
-So, first I set the breakpoint (`bm ncrypt!SslExpandTrafficKeys`) and issued a TLS connection to our testbed. As we've already discussed in [section 5.3](#sect5.3), the fourth arg will be in the register `R9` and the fifth will be on stack at `RSP+0x28`. These are the adresses where the pointers to the newly-created keys will be written after the call finishes. Let's take a note before proceeding with the call:
+So, first I set the breakpoint (`bm ncrypt!SslExpandTrafficKeys`) and issued a TLS connection to our testbed. As we've already discussed in [section 5.3](#53-matching-keys-to-sessions), the fourth arg will be in the register `R9` and the fifth will be on stack at `RSP+0x28`. These are the adresses where the pointers to the newly-created keys will be written after the call finishes. Let's take a note before proceeding with the call:
 ```
 0:005> r r9
 r9=000001e0fe6b9a40
@@ -1071,14 +1071,14 @@ var get_secret_from_BDDD = function(struct_BDDD){
 
 Hooray, we now have a way to extract the secrets for TLS1.3! The only thing that is left is to tie them to a session via a client random.
 
-Let's remember [section 5.6](#sect5.6) where we've dealt with session hashes for TLS1.2. While in TLS1.2 calculating the session hash was an optional extension, in TLS1.3 it is actually embedded in the protocol, see page 90 of [\[34\]](#ref34):
+Let's remember [section 5.6](#56-dealing-with-tls-session-hashes) where we've dealt with session hashes for TLS1.2. While in TLS1.2 calculating the session hash was an optional extension, in TLS1.3 it is actually embedded in the protocol, see page 90 of [\[34\]](#ref34):
 ```
 Derive-Secret(Secret, Label, Messages) =
   HKDF-Expand-Label(Secret, Label,
     Transcript-Hash(Messages), Hash.length)
 ```
 
-This `Derive-Secret` is the function that is used to get the traffic secrets, among others. This all means that by the time our `ncrypt!SslExpandTrafficKeys` is called, the session hash was already calculated! Testing shows that the same `SslHashHandshake` from [section 5.6](#sect5.6)  is used, so we can reuse our approach of parsing ClientHello passed to it as an argument.
+This `Derive-Secret` is the function that is used to get the traffic secrets, among others. This all means that by the time our `ncrypt!SslExpandTrafficKeys` is called, the session hash was already calculated! Testing shows that the same `SslHashHandshake` from [section 5.6](#56-dealing-with-tls-session-hashes)  is used, so we can reuse our approach of parsing ClientHello passed to it as an argument.
 
 All that is left is to take into account that we have two succeeding calls to `SslExpandTrafficKeys`, first for handshake keys and the second - for application keys. The final part of the hook for TLS1.3 is as follows:
 ```javascript
@@ -1107,7 +1107,7 @@ Interceptor.attach(Module.getExportByName('ncrypt.dll', 'SslExpandTrafficKeys'),
 
 ```
 
-## <a href="#sect7" id="sect7">7</a> Putting it all together 
+## 7 Putting it all together 
 
 We will use the frida.exe tool that is installed as a part of frida python package - you first install Python3, then go to python home and use `.\Scripts\pip.exe install frida-tools frida` to install it. After that the frida.exe will be inside .\Scripts dir, in my case - C:\Python3\Scripts\frida.exe.
 
@@ -1125,7 +1125,7 @@ For TLS1.3 the script additionally hooks `SslExpandTrafficKeys` (and `SslExpandE
 
 The script is tested on Win10 1909 and 2004, but should also work on other x64 Windows verions. 
 
-## <a href="#sect8" id="sect8">8</a> References
+## 8 References
 
 <a id="ref1">[1]</a> Jacob M. Kambic. Cunning With CNG: Soliciting Secrets from Schannel - [Whitepaper from DEFCON 24](https://media.defcon.org/DEF%20CON%2024/DEF%20CON%2024%20presentations/DEF%20CON%2024%20-%20Jkambic-Cunning-With-Cng-Soliciting-Secrets-From-Schannel-WP.pdf), [Slides from BlackHat USA 2016](https://www.blackhat.com/docs/us-16/materials/us-16-Kambic-Cunning-With-CNG-Soliciting-Secrets-From-SChannel.pdf), ["Extracting CNG TLS/SSL artifacts from LSASS memory" by Jacob M. Kambic](https://docs.lib.purdue.edu/open_access_theses/782/) 
 
