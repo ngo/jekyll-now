@@ -1071,6 +1071,8 @@ var get_secret_from_BDDD = function(struct_BDDD){
 
 Hooray, we now have a way to extract the secrets for TLS1.3! The only thing that is left is to tie them to a session via a client random.
 
+**UPD 2020-07-06:** The procedure above assumes a fixed key size of 48 bytes, which is not always the case for TLS1.3 (as opposed to TLS1.2, where the Master Secret is always 48 bytes) - the size depends on the ciphersuite used. The size of the secret can be found in a DWORD at offset 0x10  of the YKSM struct, in this case 0x30. The code in the repo was updated to accomodate different key sizes.
+
 Let's remember [section 5.6](#56-dealing-with-tls-session-hashes) where we've dealt with session hashes for TLS1.2. While in TLS1.2 calculating the session hash was an optional extension, in TLS1.3 it is actually embedded in the protocol, see page 90 of [\[34\]](#ref34):
 ```
 Derive-Secret(Secret, Label, Messages) =
