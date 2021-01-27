@@ -14,4 +14,4 @@ The TL;DR is as follows:
 
 This work is part of my R&D activities at [SolidLab LLC](https://solidlab.ru) and was fully funded by the company. I'm grateful to be able to do reseach as part of my job. We do offensive security, web application analysis and SDL consunting. We also develop [a WAF](https://solidwall.io/).
 
-**[Read part 1](/decrypting-schannel-tls-part-2/)**.
+**[Read part 1](/decrypting-schannel-tls-part-1/)**.
